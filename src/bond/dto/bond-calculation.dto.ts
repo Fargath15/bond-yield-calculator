@@ -16,6 +16,7 @@ export type BondPriceClassification = 'discount' | 'par' | 'premium';
 
 export class BondCashFlowEntryDto {
   periodNumber: number;
+  paymentDate: string;
   couponPayment: number;
   cumulativeInterest: number;
   remainingPrincipal: number;

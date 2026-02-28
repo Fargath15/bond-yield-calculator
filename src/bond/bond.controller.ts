@@ -4,7 +4,7 @@ import { BondCalculationDto, BondYieldResultDto } from './dto/bond-calculation.d
 import { JoiValidationPipe } from '../common/pipes/joi-validation.pipe';
 import { bondCalculationSchema } from './validation/bond-calculation.schema';
 
-@Controller('bond')
+@Controller({ path: 'bond', version: '1' })
 export class BondController {
   constructor(private readonly bondService: BondService) {}
 

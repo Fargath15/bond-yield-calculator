@@ -12,9 +12,23 @@ export type BondPriceClassification = 'discount' | 'par' | 'premium';
 
 export interface BondCashFlowEntry {
   periodNumber: number;
+  paymentDate: string;
   couponPayment: number;
   cumulativeInterest: number;
   remainingPrincipal: number;
+}
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function addMonths(baseDate: Date, months: number): Date {
+  const date = new Date(baseDate);
+  date.setMonth(date.getMonth() + months);
+  return date;
 }
 
 export function classifyBondPrice(input: BondCalculationInput): BondPriceClassification {
@@ -36,10 +50,7 @@ export function getNumberOfPeriods(yearsToMaturity: number, frequency: number): 
   return Math.max(1, Math.round(periods));
 }
 
-export function priceFromYield(
-  perPeriodYield: number,
-  input: BondCalculationInput,
-): number {
+export function priceFromYield(perPeriodYield: number,input: BondCalculationInput): number {
   const { faceValue, couponRate, yearsToMaturity, frequency } = input;
   const periods = getNumberOfPeriods(yearsToMaturity, frequency);
   const couponPerPeriod = (faceValue * couponRate) / frequency;
@@ -56,18 +67,16 @@ export function priceFromYield(
   return presentValue;
 }
 
-export function priceDifferenceFromYield(
-  perPeriodYield: number,
-  input: BondCalculationInput,
-): number {
+export function priceDifferenceFromYield(perPeriodYield: number, input: BondCalculationInput): number {
   const { marketPrice } = input;
   return priceFromYield(perPeriodYield, input) - marketPrice;
 }
 
-export function generateCashFlowSchedule(input: BondCalculationInput): BondCashFlowEntry[] {
+export function generateCashFlowSchedule(input: BondCalculationInput, startDate: Date = new Date()): BondCashFlowEntry[] {
   const { faceValue, couponRate, yearsToMaturity, frequency } = input;
   const periods = getNumberOfPeriods(yearsToMaturity, frequency);
   const couponPerPeriod = (faceValue * couponRate) / frequency;
+  const monthsPerPeriod = 12 / frequency;
 
   const schedule: BondCashFlowEntry[] = [];
   let cumulativeInterest = 0;
@@ -75,10 +84,13 @@ export function generateCashFlowSchedule(input: BondCalculationInput): BondCashF
   for (let period = 1; period <= periods; period += 1) {
     cumulativeInterest += couponPerPeriod;
 
+    const periodIndex = period - 1;
+    const paymentDate = addMonths(startDate, periodIndex * monthsPerPeriod);
     const remainingPrincipal = period === periods ? 0 : faceValue;
 
     schedule.push({
       periodNumber: period,
+      paymentDate: formatDate(paymentDate),
       couponPayment: couponPerPeriod,
       cumulativeInterest,
       remainingPrincipal,

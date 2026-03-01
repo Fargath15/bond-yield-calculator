@@ -4,13 +4,13 @@ import { BondCalculationDto, BondYieldResultDto } from './dto/bond-calculation.d
 import { JoiValidationPipe } from '../common/pipes/joi-validation.pipe';
 import { bondCalculationSchema } from './validation/bond-calculation.schema';
 
-@Controller({ path: 'bond', version: '1' })
+@Controller('bond')
 export class BondController {
   constructor(private readonly bondService: BondService) {}
 
   @Post('calculate')
   @UsePipes(new JoiValidationPipe(bondCalculationSchema))
-  calculate(@Body() payload: BondCalculationDto): BondYieldResultDto {
+  public calculate(@Body() payload: BondCalculationDto): BondYieldResultDto {
     return this.bondService.calculateYield(payload);
   }
 }

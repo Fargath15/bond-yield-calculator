@@ -1,3 +1,5 @@
+import type { BondPriceClassification } from '../types/bond-yield.types';
+
 export class BondCalculationDto {
   faceValue: number;
   /**
@@ -11,8 +13,6 @@ export class BondCalculationDto {
    */
   frequency: number;
 }
-
-export type BondPriceClassification = 'discount' | 'par' | 'premium';
 
 export class BondCashFlowEntryDto {
   periodNumber: number;

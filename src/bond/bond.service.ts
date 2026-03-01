@@ -2,20 +2,18 @@ import { Injectable } from '@nestjs/common';
 import {
   BondCalculationDto,
   BondCashFlowEntryDto,
-  BondPriceClassification,
   BondYieldResultDto,
 } from './dto/bond-calculation.dto';
 import {
-  calculateYieldToMaturity,
-  classifyBondPrice,
-  calculateCurrentYield,
-  calculateTotalInterest,
-  generateCashFlowSchedule,
+  BondYieldCalculator,
 } from './domain/bond-yield';
+import { BondPriceClassification } from './types/bond-yield.types';
 
 @Injectable()
 export class BondService {
-  calculateYield(input: BondCalculationDto): BondYieldResultDto {
+  private readonly bondYieldCalculator = new BondYieldCalculator();
+
+  public calculateYield(input: BondCalculationDto): BondYieldResultDto {
     const calculationInput = {
       faceValue: input.faceValue,
       couponRate: input.couponRate / 100,
@@ -24,13 +22,13 @@ export class BondService {
       frequency: input.frequency,
     };
 
-    const yieldToMaturityRaw = calculateYieldToMaturity(calculationInput);
+    const yieldToMaturityRaw = this.bondYieldCalculator.calculateYieldToMaturity(calculationInput);
     const yieldToMaturity = Number(yieldToMaturityRaw.toFixed(6));
-    const currentYieldRaw = calculateCurrentYield(calculationInput);
+    const currentYieldRaw = this.bondYieldCalculator.calculateCurrentYield(calculationInput);
     const currentYield = Number(currentYieldRaw.toFixed(6));
-    const totalInterest = calculateTotalInterest(calculationInput);
-    const priceClassification: BondPriceClassification = classifyBondPrice(calculationInput);
-    const cashFlows: BondCashFlowEntryDto[] = generateCashFlowSchedule(calculationInput);
+    const totalInterest = this.bondYieldCalculator.calculateTotalInterest(calculationInput);
+    const priceClassification: BondPriceClassification = this.bondYieldCalculator.classifyBondPrice(calculationInput);
+    const cashFlows: BondCashFlowEntryDto[] = this.bondYieldCalculator.generateCashFlowSchedule(calculationInput);
 
     return {
       yieldToMaturity,
